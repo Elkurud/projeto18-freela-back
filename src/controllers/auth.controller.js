@@ -43,11 +43,26 @@ export async function signIn(req, res) {
         const isPasswordCorrect = bcrypt.compareSync(password, user[0].password)
         if (!isPasswordCorrect) return res.status(401).send("senha incorreta")
 
+        const replaceSession = await db.query(`
+            SELECT * FROM sessions WHERE "userId" = $1
+        `, [user[0].id])
+        if(replaceSession.rowCount > 0) {
+            db.query(`
+            DELETE FROM sessions WHERE "userId" = $1
+        `, [user[0].id])
+        }
+
         const token = uuid()
+
         await db.query(`
             INSERT INTO sessions (token, "userId") VALUES ($1, $2)
         `, [token, user[0].id])
-        res.status(200).send({ token })
+        res.status(200).send({
+            id: user[0].id,
+            name: user[0].name,
+            image: user[0].image,
+            token
+        })
     } catch (err) {
         res.status(500).send(err.message)
     }

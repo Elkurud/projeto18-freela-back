@@ -27,7 +27,7 @@ export async function getPost(req, res) {
              posts.description,
              posts."createdAt"
              FROM users
-             LEFT JOIN posts ON posts."userId" = users.id
+             INNER JOIN posts ON posts."userId" = users.id
              ORDER BY posts."createdAt" DESC;
              `)
              res.send(result.rows)
